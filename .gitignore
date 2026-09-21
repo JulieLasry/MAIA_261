@@ -1,0 +1,25 @@
+# Claude
+.claude/
+CLAUDE.md
+
+# Environements
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Data 
+data/preprocessed/*
+!data/preprocessed/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+
+# Models and logs
+models/*
+!models/.gitkeep
+
+# macOS
+.DS_Store

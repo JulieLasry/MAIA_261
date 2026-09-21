@@ -1,0 +1,27 @@
+# Base
+numpy
+pandas
+scipy
+matplotlib
+scikit-learn
+
+# DL (torch and torch vision installed separately, with the CUDA version)
+lightning
+monai
+
+# Images
+pillow
+SimpleITK
+albumentations
+opencv-python-headless
+
+# Experiment tracking and optimization
+mlflow
+optuna
+
+# Config and utilitaries
+PyYAML
+tqdm
+
+# Notebook
+ipykernel

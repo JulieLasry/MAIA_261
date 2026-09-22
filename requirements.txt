@@ -11,6 +11,7 @@ monai
 
 # Images
 pillow
+tifffile
 SimpleITK
 albumentations
 opencv-python-headless

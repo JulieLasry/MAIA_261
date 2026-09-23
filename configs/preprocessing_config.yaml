@@ -1,0 +1,24 @@
+data:
+  base_dir: data/raw
+  output_dir: data/preprocessed
+  target_size: 224
+  clipLimit: 2.0
+  tileGridSize: 8
+
+split:
+  seed: 42
+  test_size: 0.2
+  n_folds: 5
+
+augmentation:              # to modify  
+  rotation: [-15.0, 15.0]   
+  translation: [-0.1, 0.1]  
+  scaling: [0.8, 1.2]
+  shear: [-5.0, 5.0]        
+  gaussian_noise: [0.1, 0.3]
+  brightness: [-0.3, 0.3]
+  contrast: [-0.3, 0.3]
+
+normalization:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]

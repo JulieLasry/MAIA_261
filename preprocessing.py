@@ -1,7 +1,7 @@
 import yaml
 from pathlib import Path
-import cv2 as cv
 from src.data.data_preprocessing import DataPreprocessing
+from src.data.data_splitting import DataSplitting
 from src.utils.preprocessing_utils import PreprocessingUtils
 
 CONFIG_DIR: Path = Path(__file__).parent / 'configs'
@@ -38,6 +38,28 @@ class Preprocessing:
         DataPreprocessing.dataset_saving(
             preprocessing_config=preprocessing_config
         )
+
+        # Splitting the data into train/val/test set with a stratified K-Fold CV
+        dataset_json_path: Path = Path(preprocessing_config['data']['output_dir']) / "dataset.json"
+        try:
+            train_val_indices, test_indices, labels = DataSplitting.split_train_test(
+                dataset_json_path=dataset_json_path,
+                preprocessing_config=preprocessing_config
+            )
+
+            folds = DataSplitting.create_cv_folds(
+                preprocessing_config=preprocessing_config,
+                train_val_indices=train_val_indices,
+                labels=labels
+            )
+
+            DataSplitting.save_splits(
+                preprocessing_config=preprocessing_config,
+                test_indices=test_indices,
+                folds=folds
+            )
+        except FileNotFoundError as e:
+            print(f"dataset.json file not found. Check if the previous preprocessing steps succeeded : {e}")
         
 if __name__ == "__main__":
     Preprocessing.run()

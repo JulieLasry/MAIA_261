@@ -1,37 +1,51 @@
-### MAIA 261 - Project name
+### MAIA 261 - 2D Chest X-Ray classification
 
 ## Project scope : 
-"TO COMPLETE"
+The aim of this technical interview project
+is to classify thoracic 2D X-Ray from children
+aged 1 to 5 years into the three following categories:
+- Normal
+- Bacteria-infected
+- Virus-infected
+This challenge will then highlight my ability to
+analyze and preprocess the data, wisely choose a 
+Deep Learning classifier model, train and test it, 
+and select appropriate metrics and prediction 
+representations. Optional work will focus on unsupervised 
+methods for new labels detection, and on insightful tools 
+to provide a better clinical understanding of the model 
+predictions.
 
 ## Installation
 
 Requires Python 3.10.12
 
-**macOS / Linux** "TO COMPLETE"
+**macOS / Linux**
 ```bash
-git clone <"GithubRepo">
-cd Bone_Age_Classification_Regression
-python -m venv .venv
+git clone https://github.com/JulieLasry/MAIA_261.git
+cd MAIA_261
+python3.10 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Windows** "TO COMPLETE"
+**Windows**
 ```powershell
-git clone <https://github.com/JulieLasry/rsna-boneage-classification-regression>
-cd Bone_Age_Classification_Regression
+git clone https://github.com/JulieLasry/MAIA_261.git
+cd MAIA_261
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**Data.** Data coming from the "TO COMPLETE":
+## Data
+Please place the raw data provided as part of this technical interview,
+as unzipped files, under data/raw/ as follows:
 
-```
-data/raw/ "TO COMPLETE"
-├── boneage-training-dataset.csv
-└── boneage-training-dataset/boneage-training-dataset/*.png
-```
+data/raw/
+├── data_info.csv
+└── check-X-ray/
+    └── *.tiff
 
 ## Execution and usage
 

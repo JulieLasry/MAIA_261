@@ -63,7 +63,7 @@ class DataAugmentation():
             A.Normalize(
                 mean=training_config['normalization']['mean'],
                 std=training_config['normalization']['std'],
-                max_pixel_value=['normalization']['max_pixel_value']
+                max_pixel_value=training_config['normalization']['max_pixel_value']
             ),
             ToTensorV2()
         ])

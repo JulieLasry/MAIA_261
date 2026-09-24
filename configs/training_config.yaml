@@ -1,4 +1,5 @@
-augmentation:              
+augmentation:     
+  horizontal_flip: 0.5         # probability         
   rotation: [-15.0, 15.0]      # degrees
   translation: [-0.1, 0.1]     # percentage of the image
   scaling: [0.9, 1.1]          # factor

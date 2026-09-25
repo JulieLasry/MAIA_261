@@ -1,10 +1,8 @@
-import yaml
 from pathlib import Path
 from src.data.data_preprocessing import DataPreprocessing
 from src.data.data_splitting import DataSplitting
 from src.utils.preprocessing_utils import PreprocessingUtils
-
-CONFIG_DIR: Path = Path(__file__).parent / 'configs'
+from src.utils.config_utils import ConfigUtils
 
 class Preprocessing:
     """
@@ -13,19 +11,15 @@ class Preprocessing:
     with the image paths and labels, and another one
     with the test and fold indexes for the cross validation.         
     """
-
-    @staticmethod
-    def load_config(path: Path) -> dict:
-        with open(path, 'r') as f:
-            return yaml.safe_load(f)
     
     @staticmethod
     def run() -> dict:
         # Configs paths
-        preprocessing_config: dict = Preprocessing.load_config(
-            CONFIG_DIR / 'preprocessing_config.yaml'
+        preprocessing_config: dict = ConfigUtils.load_config(
+            'preprocessing_config.yaml'
         )
 
+        # Step 1
         # Preprocess the data : resize and contrast enhancement
         DataPreprocessing.dataset_preprocessing(
             preprocessing_config=preprocessing_config,
@@ -34,11 +28,13 @@ class Preprocessing:
             )
         )
 
+        # Step 2
         # Save the dataset Json file (image paths and labels)
         DataPreprocessing.dataset_saving(
             preprocessing_config=preprocessing_config
         )
 
+        # Step 3
         # Splitting the data into train/val/test set with a stratified K-Fold CV
         dataset_json_path: Path = Path(preprocessing_config['data']['output_dir']) / "dataset.json"
         try:

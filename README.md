@@ -49,64 +49,77 @@ data/raw/
 
 ## Execution and usage
 
-Run the data pipeline from the project root:
+Run the preprocessing pipeline from the project root:
 
-- For data processing : "TO COMPLETE"
 ```bash
-python processing.py
+python preprocessing.py
 ```
-This creates `data/processed/data.csv` (fold and test assignment for each / "TO COMPLETE"
-image) and prints the size of the train / val / test sets for every fold.
+This resizes and enhances (CLAHE) all raw images, saves them to
+data/preprocessed/check-X-ray/, builds dataset.json (image
+paths and labels), splits the data into a stratified test set and
+K-Fold cross-validation folds, and saves the split
+indices to splits.json.
 
+Training (python training.py) is in progress and will train the
+classifier for each fold, log metrics and artifacts to MLflow.
 
-Parameters are set in `configs/`: "TO COMPLETE"
+Parameters are set in configs/:
 
-| File | Content |
-|------|---------| "TO COMPLETE"
-| `preprocessing_config.yaml` | task (`classification` / `regression`), paths, image size, split, augmentations, normalization |
-| `training_config.yaml` | dataloader and training parameters |
+┌───────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────┐
+│           File            │                                          Content                                          │
+├───────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┤
+│ preprocessing_config.yaml │ raw/output paths, target image size, CLAHE parameters, split ratio, seed, number of folds │
+├───────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┤
+│ training_config.yaml      │ augmentations, normalization, dataloader parameters                                       │
+└───────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────┘
 
 Project structure:
- "TO COMPLETE"
-```
-├── configs/           # YAML configs
-├── data/              # raw and processed data (not versioned)
-├── models/            # trained weights (not versioned)
-├── notebooks/         # data exploration
-├── src/data/          # raw loading, transforms, Dataset, DataModule
-├── processing.py      # runs the data pipeline
-└── train.py, test.py, inference.py, optimize.py
-```
+├── configs/               # YAML configs (preprocessing, training)
+├── data/                  # raw and preprocessed data (not versioned)
+├── docs/                  # sub-readmes (notebooks, preprocessing)
+├── models/                # trained weights (not versioned)
+├── notebooks/             # data exploration
+├── src/data/               # preprocessing, splitting, augmentation, Dataset, DataModule
+├── src/models/             # model architecture
+├── src/utils/              # shared utilities
+├── preprocessing.py        # runs the preprocessing + splitting pipeline
+└── training.py              # runs the training pipeline (in progress)
 
-## Used technologies "TO COMPLETE"
+Used technologies
 
-| Technology | Explanation |
-|---|---|
-| PyTorch | Deep learning framework |
-| Lightning | Structures the data and training code (`DataModule`, `LightningModule`) |
-| Albumentations | Fast image augmentations and preprocessing |
-| scikit-learn | Stratified splits and K-fold cross-validation |
-| pandas / NumPy | Tabular data handling |
-| Pillow | Image loading |
-| PyYAML | Config files |
+┌───────────────────┬──────────────────────────────────────────────────────────────────────┐
+│    Technology     │                             Explanation                              │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ PyTorch           │ Deep learning framework                                              │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ Lightning         │ Structures the data and training code (DataModule, LightningModule)  │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ MONAI             │ Medical-imaging-specific model architectures (EfficientNet backbone) │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ Albumentations    │ Fast image augmentations and preprocessing                           │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ OpenCV            │ CLAHE contrast enhancement                                           │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ scikit-learn      │ Stratified splits and K-fold cross-validation                        │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ pandas / NumPy    │ Tabular data handling                                                │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ Pillow / tifffile │ Image loading                                                        │
+├───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ PyYAML            │ Config files                                                         │
+└───────────────────┴──────────────────────────────────────────────────────────────────────┘
 
-Planned: MLflow (experiment tracking), Optuna (hyperparameter search).
+Planned: MLflow (experiment tracking). Optuna (hyperparameter
+search) is included as a dependency but not used yet.
 
-## Current features "TO COMPLETE"
+Current features
 
-- Config-driven pipeline, with no hard-coded hyperparameters
-- Classification or regression target, chosen in the config
-- Stratified test set, then stratified 5-fold cross-validation
-- Train-only augmentations (flip, rotation, affine, noise, brightness/contrast)
-- One Lightning `DataModule` per fold
-
-## Contributing "TO COMPLETE"
-
-This is a personal learning project, but suggestions are welcome:
-
-1. Fork the repository and create a branch (`git checkout -b feature/my-idea`).
-2. Commit your changes with a clear message.
-3. Open a pull request describing the change.
+- Config-driven preprocessing pipeline, no hard-coded hyperparameters
+- CLAHE contrast enhancement and aspect-ratio-preserving resizing
+- Corrupted/invalid file detection before and after preprocessing
+- Stratified test set, then stratified K-Fold cross-validation
+- Train-only augmentations (flip, affine, noise, brightness/contrast, blur)
+- One Lightning DataModule per fold
 
 ## Contributors
 

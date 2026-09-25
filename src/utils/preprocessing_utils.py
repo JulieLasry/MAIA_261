@@ -2,7 +2,7 @@ import cv2 as cv
 from pathlib import Path
 import json
 
-class PreprocessingUtils():
+class PreprocessingUtils:
     """ 
     Utils class for the preprocessing steps.
     Here are a method for creating a CLAHE object once,

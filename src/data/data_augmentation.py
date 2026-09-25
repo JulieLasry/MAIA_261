@@ -26,7 +26,6 @@ class DataAugmentation():
             The composed tranformation for the training files.
         """
         return A.Compose([
-            A.HorizontalFlip(p=training_config['augmentation']['horizontal_flip']), 
             A.Affine(
                 scale=training_config['augmentation']['scaling'], 
                 translate_percent=training_config['augmentation']['translation'],
@@ -37,7 +36,8 @@ class DataAugmentation():
             A.RandomBrightnessContrast(
                 brightness_limit=training_config['augmentation']['brightness'],
                 contrast_limit=training_config['augmentation']['contrast']
-            )
+            ),
+            A.GaussianBlur(sigma_limit=training_config['augmentation']['gaussian_blur_sigma'])
         ])
 
     @staticmethod

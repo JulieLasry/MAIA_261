@@ -16,8 +16,8 @@ class ChestXRayDataset(Dataset):
         samples (list): List of image paths and labels pairs.
         training_config (dict): The dict of the training main paths 
         and variable values in training process. 
-        is_train (bool): Whether training augmentations are applied or not if
-        exams are part of the training set.
+        is_train (bool): If the analyzed exam is part of the training
+        set, to apply specific augmentations.
     """
 
     def __init__(
@@ -62,5 +62,8 @@ class ChestXRayDataset(Dataset):
             else:
                 tensor_image: torch.Tensor = self.final_transform(image=np.array(img))['image']
 
-        tensor_label: torch.Tensor = torch.tensor(label, dtype=torch.long)        
+        tensor_label: torch.Tensor = torch.tensor(label, dtype=torch.long) 
+        # To inspect the images validity  
+        assert tensor_image.ndim == 3 and tensor_image.shape[0] == 3, \
+            f"Unexpected image tensor shape: {tensor_image.shape}, expected (3, H, W)"
         return tensor_image, tensor_label, 

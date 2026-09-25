@@ -6,21 +6,25 @@ from src.utils.config_utils import ConfigUtils
 
 class Preprocessing:
     """
-    Processer main function to load our raw data,
-    process and create associated Json files, one
-    with the image paths and labels, and another one
-    with the test and fold indexes for the cross validation.         
+    Runs the preprocessing 3-steps pipeline. It resizes and enhances 
+    the raw images, saves the dataset Json file (image paths and labels),
+    then splits the data into a stratified test set and stratified
+    K-Fold cross-validation folds.
     """
-    
-    @staticmethod
-    def run() -> dict:
-        # Configs paths
-        preprocessing_config: dict = ConfigUtils.load_config(
-            'preprocessing_config.yaml'
-        )
 
-        # Step 1
-        # Preprocess the data : resize and contrast enhancement
+    @staticmethod
+    def run_step1_preprocess_images(preprocessing_config: dict) -> None:
+        """
+        Resizes and applies CLAHE contrast enhancement to every raw
+        image, saving the results to the preprocessed output folder.
+
+        Args:
+            preprocessing_config (dict): The dict of the preprocessing 
+            main paths and variable values in preprocess. 
+
+        Returns:
+            None
+        """
         DataPreprocessing.dataset_preprocessing(
             preprocessing_config=preprocessing_config,
             clahe=PreprocessingUtils.clahe_creation(
@@ -28,14 +32,37 @@ class Preprocessing:
             )
         )
 
-        # Step 2
-        # Save the dataset Json file (image paths and labels)
+    @staticmethod
+    def run_step2_save_dataset_json(preprocessing_config: dict) -> None:
+        """
+        Matches each preprocessed image to its label and saves the
+        paths/labels mapping into the dataset Json file.
+
+        Args:
+            preprocessing_config (dict): The dict of the preprocessing 
+            main paths and variable values in preprocess. 
+
+        Returns:
+            None
+        """
         DataPreprocessing.dataset_saving(
             preprocessing_config=preprocessing_config
         )
 
-        # Step 3
-        # Splitting the data into train/val/test set with a stratified K-Fold CV
+    @staticmethod
+    def run_step3_split_dataset(preprocessing_config: dict) -> None:
+        """
+        Splits the preprocessed dataset into a stratified test set
+        and stratified K-Fold cross-validation folds, then saves the
+        resulting indices to the splits Json file.
+
+        Args:
+            preprocessing_config (dict): The dict of the preprocessing 
+            main paths and variable values in preprocess. 
+
+        Returns:
+            None
+        """
         dataset_json_path: Path = Path(preprocessing_config['data']['output_dir']) / "dataset.json"
         try:
             train_val_indices, test_indices, labels = DataSplitting.split_train_test(
@@ -56,6 +83,22 @@ class Preprocessing:
             )
         except FileNotFoundError as e:
             print(f"dataset.json file not found. Check if the previous preprocessing steps succeeded : {e}")
-        
+
+    @staticmethod
+    def run() -> None:
+        """
+        Loads the preprocessing config and runs the 3 preprocessing
+        steps in order.
+
+        Returns:
+            None
+        """
+        preprocessing_config: dict = ConfigUtils.load_config('preprocessing_config.yaml')
+
+        Preprocessing.run_step1_preprocess_images(preprocessing_config=preprocessing_config)
+        Preprocessing.run_step2_save_dataset_json(preprocessing_config=preprocessing_config)
+        Preprocessing.run_step3_split_dataset(preprocessing_config=preprocessing_config)
+
+
 if __name__ == "__main__":
     Preprocessing.run()

@@ -8,13 +8,14 @@ from lightning.pytorch.utilities.types import OptimizerLRSchedulerConfig
 
 class ChestXRayLightningModule(L.LightningModule):
     """
-    Lightning module for training the ChestXRayModel. It defines 
-    the training, validation and test steps and the optimizer
-    depending on the training phases (feature extractor and 
-    progressive finetuning of our backbone).
-    The classification metrics (AUPRC, balanced accuracy,
-    macro recall, F2 — per class and macro-averaged) are also
-    logged for validation. 
+    Lightning module for training the ChestXRayModel. It defines
+    the training, validation and test steps and the optimizer,
+    using the learning rate set for the current training phase
+    (feature extractor or progressive finetuning of the backbone).
+    For validation, the AUPRC of the bacteria-infected class is
+    logged (used for checkpoint selection), along with recall and
+    F2 score for both the bacteria-infected class and macro-averaged
+    across all classes.
 
     Args:
         model (nn.Module): The classification model (ChestXRayModel).
@@ -124,7 +125,9 @@ class ChestXRayLightningModule(L.LightningModule):
     ) -> None:
         """
         Computes the validation loss and updates the validation
-        metrics (AUPRC, balanced accuracy, recall, F2) for this batch.
+        metrics (AUPRC (bacteria-infected samples), recall and F2
+        (both macro-averaged and for bacteria-infected samples)) 
+        for this batch.
 
         Args:
             batch: Loaded validation batch of the image and label tensors.

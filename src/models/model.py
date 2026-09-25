@@ -8,7 +8,7 @@ class ChestXRayModel(nn.Module):
     here in the ResNet classification head for regularization, as 
     Global Average Pooling and Batch Normalization are already part 
     of the model architecture. 
-    Two phases are supported: phase 1 is a feature extraction phase,
+    Two phases are implemented. The phase 1 is a feature extraction phase,
     where the backbone weights are frozen and only the classification
     head is trained, leveraging the pretrained ImageNet features.
     Phase 2, triggered externally via unfreeze_last_stages(), 

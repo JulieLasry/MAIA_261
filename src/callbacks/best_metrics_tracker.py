@@ -1,7 +1,7 @@
 import torch
 import lightning as L
 
-class BestMetricTracker(L.Callback):
+class ChestXRayBestMetricTracker(L.Callback):
     """
     Tracks the best validation AUPRC (bacteria class) seen across
     epochs, and saves the other validation metrics logged at

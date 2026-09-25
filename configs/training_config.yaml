@@ -14,14 +14,14 @@ normalization:
   max_pixel_value: 255.0            # Max value used to scale to [0,1] before applying mean/std 
 
 dataloader:
-  batch_size: 16
+  batch_size: 32
   num_workers: 4
 
 model:
   num_classes: 3
 
 metrics:
-  bacteria_label_idx: 1
+  bacteria_label_idx: 1             # Index of the bacteria-infected samples label
 
 hyperparameters:
   optimizer: AdamW
@@ -34,3 +34,6 @@ hyperparameters:
 
   max_epochs_phase1: 10
   max_epochs_phase2: 50
+
+training:
+  amp: True

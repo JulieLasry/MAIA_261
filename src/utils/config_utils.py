@@ -1,12 +1,12 @@
 from pathlib import Path
 import yaml
 
-CONFIG_DIR: Path = Path(__file__).parent / 'configs'
+CONFIG_DIR: Path = Path(__file__).parent.parent.parent / 'configs'
 
 class ConfigUtils:
     """
-    Shared utility for loading YAML configuration files, used by
-    both the preprocessing and training scripts.
+    Shared utility for loading YAML configuration files, 
+    used by both the preprocessing and training scripts.
     """
 
     @staticmethod

@@ -28,7 +28,7 @@ class ChestXRayModel(nn.Module):
 
         num_features: int = self.backbone.fc.in_features  # 2048 output features
         self.backbone.fc = nn.Sequential(
-            nn.Dropout(p=0.4),
+            nn.Dropout(p=training_config['hyperparameters']['dropout']),
             nn.Linear(num_features, training_config['model']['num_classes'])
         )
 
@@ -43,9 +43,9 @@ class ChestXRayModel(nn.Module):
         n = sum(p.numel() for p in self.backbone.parameters() if p.requires_grad)
         print(f"Number of trainable parameters : {n}")
 
-    def unfreeze_last_blocks(
+    def unfreeze_last_stages(
         self,
-        num_blocks: int = 2,
+        num_stages: int,
     ) -> None:
         """
         Progressively unfreezes only the last residual 
@@ -62,7 +62,7 @@ class ChestXRayModel(nn.Module):
             self.backbone.layer1, self.backbone.layer2,
             self.backbone.layer3, self.backbone.layer4
         ]
-        for layer in resnet_layers[-num_blocks:]:
+        for layer in resnet_layers[-num_stages:]:
             for param in layer.parameters():
                 param.requires_grad = True
 

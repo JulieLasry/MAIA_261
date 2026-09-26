@@ -1,5 +1,6 @@
 from pathlib import Path
 import time
+from datetime import datetime
 import json
 import numpy as np
 import torch
@@ -24,7 +25,7 @@ class Training:
     fine-tuning). Step 1 validates the data/split by printing the
     dataloader lengths per fold. Step 2 trains each fold, saving
     checkpoints into 'models/', MLflow logs under 'training_outputs/mlflow'
-    and a YAML summary (best metrics, training time, number of
+    and two Json summaries (best metrics and training time with number of
     trainable parameters per fold) into 'training_outputs/training_summary.yaml'.
     """
 
@@ -44,7 +45,7 @@ class Training:
                 training_config=training_config,
                 fold_num=fold_num
             )
-            datamodule.setup()
+            datamodule.setup() 
             for split in ("train", "val", "test"):
                 dataset = getattr(datamodule, f"{split}_dataset")
                 if dataset is not None:
@@ -92,7 +93,6 @@ class Training:
             run_name=run_name
         )
 
-        callbacks: list = []
         p1_early_stopping = EarlyStopping(
             monitor="val_auprc_bacteria",
             mode="max",
@@ -104,13 +104,16 @@ class Training:
 
         checkpoint_path: Path = MODEL_DIR / "checkpoint"
         TrainingUtils.create_path(path=checkpoint_path)
+        checkpoint_path_per_fold = checkpoint_path / "per_fold"
+        TrainingUtils.create_path(path=checkpoint_path_per_fold)
         checkpoint = ModelCheckpoint(
-            dirpath=checkpoint_path,
-            filename=f"fold_{fold_num}",
+            dirpath=checkpoint_path_per_fold,
+            filename=f"{training_config['training']['name']}_fold_{fold_num}",
             monitor="val_auprc_bacteria",
             mode="max",
             save_top_k=1,
             save_last=True, # resume and to compare last and best ckpt
+            enable_version_counter=False,
             verbose=True
         )
         p1_callbacks: list = [p1_early_stopping, best_metric_tracker, checkpoint]
@@ -150,7 +153,7 @@ class Training:
         p2_callbacks: list = [p2_early_stopping, best_metric_tracker, checkpoint]
 
         # Phase 2 - progressive finetuning 
-        model.unfreeze_last_stages(num_stages=2)
+        model.unfreeze_last_stages(num_stages=training_config['hyperparameters']['unfreeze_stages'])
         p2_ligntning_module = ChestXRayLightningModule(
             model=model,
             training_config=training_config,
@@ -191,27 +194,39 @@ class Training:
         """
         Runs the run_fold() method for every fold, 
         then saves the combined summary of all folds 
-        to a Json file in 'training_outpus/'.
+        and a time execution and number of model
+        parameters summary into two Json files  
+        in 'training_outpus/'.
         """
         fold_best_results: dict[int, dict] = {}
-        for fold_num in range(1, preprocessing_config['n_folds']+1):
+        for fold_num in range(1, preprocessing_config['split']['n_folds'] + 1):
             fold_best_results[fold_num] = Training.run_fold(
                 fold_num=fold_num,
                 preprocessing_config=preprocessing_config,
                 training_config=training_config
             )
 
-        # Saving the metrics mean and std across all folds 
+        # Commputing the metrics mean and std across all folds 
         metrics_names: list[str] = [
             "val_auprc_bacteria", "val_loss", "val_recall_bacteria",
             "val_f2_bacteria", 'val_recall_macro', "val_f2_macro"
         ]
-        best_results_dict: dict = {"folds": best_results_dict, "mean": {}}
+        metrics_summary: dict = {}
         for metric_name in metrics_names:
-            values = [best_results_dict[fold_num][metric_name] for fold_num in best_results_dict]
-            best_results_dict["mean"][metric_name] = round(float(np.mean(values)), 2)
-            best_results_dict["std"][f"{metric_name}_std"] = round(float(np.std(values)), 2)
+            values = [fold_best_results[fold_num][metric_name] for \
+                       fold_num in fold_best_results]
+            metrics_summary[metric_name] = {
+                "mean": round(float(np.mean(values)), 2),
+                "std": round(float(np.std(values)), 2)
+            }
+        best_results_dict: dict = {
+            "date": datetime.now().isoformat(),
+            "run_name": training_config['training']['name'],
+            "metrics_summary": metrics_summary
+        }
 
+        # Saving or updating the dictionnary summerizing
+        # the metrics best results across all folds into a Json
         best_result_json_path: Path = OUTPUT_DIR / "best_results.json"
         if best_result_json_path.is_file():
             with open(best_result_json_path, "r", encoding="utf-8") as f:
@@ -219,12 +234,35 @@ class Training:
         else:
             all_best_results = {}
 
-        # Updating the dictionary with the new values
         all_best_results.update(best_results_dict)
         with open(best_result_json_path, "w", encoding="utf-8") as f:
             json.dump(all_best_results, f, indent=4)
-        
 
+        # Saving the time and execution and number of parameters for each fold
+        execution_summary: dict = {
+            "date": datetime.now().isoformat(),
+            "run_name": training_config['training']['name'],
+            "folds": {
+                fold_num: {
+                    "training_time_min": results["training_time_min"],
+                    "num_trainable_params": results["num_trainable_params"]
+                }
+                for fold_num, results in fold_best_results.items()
+            }
+        }
+
+        execution_json_path: Path = OUTPUT_DIR / "execution_results.json"
+        if execution_json_path.is_file():
+            with open(execution_json_path, "r", encoding="utf-8") as f:
+                execution_results = json.load(f)
+        else:
+            execution_results = {}
+
+        execution_results.update(execution_summary)
+        with open(execution_json_path, "w", encoding="utf-8") as f:
+            json.dump(execution_results, f, indent=4)
+
+        
     @staticmethod
     def run() -> None:
         """

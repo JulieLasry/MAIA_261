@@ -24,6 +24,8 @@ metrics:
   bacteria_label_idx: 1             # Index of the bacteria-infected samples label
 
 hyperparameters:
+  dropout: 0.4
+
   optimizer: AdamW
   lr_phase1: 1e-3
   lr_phase2: 1e-4
@@ -32,8 +34,12 @@ hyperparameters:
   lr_scheduler_patience: 5
   lr_es_patience: 10
 
-  max_epochs_phase1: 10
+  max_epochs_phase1: 15
   max_epochs_phase2: 50
 
+  unfreeze_stages: 2
+
 training:
+  name: "baseline"
   amp: True
+

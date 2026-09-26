@@ -51,8 +51,8 @@ class DataAugmentation():
         ImageNet, then normalized and converted into tensors.
 
         Args:
-            preprocessing_config (dict): Base config dictionnary defining the 
-                main paths, tasks and parameter values for the preprocessing task.
+            training_config (dict): The dict of the training main paths 
+            and variable values in training process. 
 
         Returns:
             A.Compose

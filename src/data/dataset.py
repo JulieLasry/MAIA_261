@@ -66,4 +66,4 @@ class ChestXRayDataset(Dataset):
         # To inspect the images validity  
         assert tensor_image.ndim == 3 and tensor_image.shape[0] == 3, \
             f"Unexpected image tensor shape: {tensor_image.shape}, expected (3, H, W)"
-        return tensor_image, tensor_label, 
+        return tensor_image, tensor_label

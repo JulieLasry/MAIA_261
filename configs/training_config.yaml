@@ -27,12 +27,13 @@ hyperparameters:
   dropout: 0.4
 
   optimizer: AdamW
-  lr_phase1: 1e-3
-  lr_phase2: 1e-4
-  weight_decay: 1e-4
+  lr_phase1: 1.0e-3
+  lr_phase2: 1.0e-4
+  weight_decay: 1.0e-4
 
   lr_scheduler_patience: 5
-  lr_es_patience: 10
+  lr_es_patience_phase1: 4
+  lr_es_patience_phase2: 10
 
   max_epochs_phase1: 15
   max_epochs_phase2: 50

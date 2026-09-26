@@ -134,13 +134,13 @@ class ChestXRayLightningModule(L.LightningModule):
             batch_idx: Batch index (unused).
         """
         images, labels = batch
-        preds = self(images)
-        probs = torch.softmax(preds, dim=1)
+        logits = self(images)
+        probs = torch.softmax(logits, dim=1)
 
         # Computes the validation loss and logs it
-        val_loss: torch.Tensor = self.criterion(preds, labels)
+        val_loss: torch.Tensor = self.criterion(logits, labels)
         self.log("val_loss", val_loss, on_step=True, on_epoch=True, prog_bar=True,
-            batch_size=preds.shape[0])
+            batch_size=logits.shape[0])
 
         # Updates the validation metrics (computed in best_metric_tracker)
         self.auprc.update(probs, labels)
@@ -177,7 +177,11 @@ class ChestXRayLightningModule(L.LightningModule):
         batch_idx: int
     ) -> torch.Tensor:
         """
-        Computes and logs the test metrics for this batch.
+        Computes and logs the test metrics for this batch. TO DO
+
+        Args:
+            batch: Loaded validation batch of the image and label tensors.
+            batch_idx: Batch index (unused).
         """
         images, labels = batch
         preds = self(images)

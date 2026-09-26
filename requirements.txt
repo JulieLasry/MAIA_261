@@ -7,22 +7,21 @@ scikit-learn
 
 # DL (torch and torch vision installed separately, with the CUDA version)
 lightning
-monai
 
 # Images
 pillow
 tifffile
-SimpleITK
 albumentations
 opencv-python-headless
 
 # Experiment tracking and optimization
 mlflow
-optuna
 
 # Config and utilitaries
 PyYAML
-tqdm
+
+# Test and visualizations
+umap-learn
 
 # Notebook
 ipykernel

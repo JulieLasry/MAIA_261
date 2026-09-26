@@ -1,0 +1,10 @@
+classes:
+  labels: [0,1,2]
+  label_names: ["Normal", "Bacteria", "Virus"]
+  bacteria_label_idx: 1
+
+uncertainty:
+  n_passes: 30 
+
+latent_space: 
+  seed: 42

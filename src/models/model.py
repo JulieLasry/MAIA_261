@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from torchvision.models import resnet50, ResNet50_Weights
 
@@ -43,6 +44,7 @@ class ChestXRayModel(nn.Module):
         n = sum(p.numel() for p in self.backbone.parameters() if p.requires_grad)
         print(f"Number of trainable parameters : {n}")
 
+
     def unfreeze_last_stages(
         self,
         num_stages: int,
@@ -66,5 +68,43 @@ class ChestXRayModel(nn.Module):
             for param in layer.parameters():
                 param.requires_grad = True
 
-    def forward(self, x):
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through the backbone, including the
+        classification head.
+
+        Args:
+            x (torch.Tensor): Batch of input images.
+
+        Returns:
+            torch.Tensor
+            The raw classification logits for each image.
+        """
         return self.backbone(x)
+
+
+    def return_embedding(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Returns the latent embedding of the image, extracted just
+        before the final classification (fc) layer right after Global 
+        Average Pooling, to be used by the latent space visualization.
+
+        Args:
+            x (torch.Tensor): Batch of input images.
+
+        Returns:
+            torch.Tensor
+            The 1D vector of the features embedding.  
+        """
+        x = self.backbone.conv1(x)
+        x = self.backbone.bn1(x)
+        x = self.backbone.relu(x)
+        x = self.backbone.maxpool(x)
+        x = self.backbone.layer1(x)
+        x = self.backbone.layer2(x)
+        x = self.backbone.layer3(x)
+        x = self.backbone.layer4(x)
+        x = self.backbone.avgpool(x)
+        x = torch.flatten(x, 1) # to have a vector
+        return x

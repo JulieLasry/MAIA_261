@@ -26,7 +26,7 @@ class Training:
     dataloader lengths per fold. Step 2 trains each fold, saving
     checkpoints into 'models/', MLflow logs under 'training_outputs/mlflow'
     and two Json summaries (best metrics and training time with number of
-    trainable parameters per fold) into 'training_outputs/training_summary.yaml'.
+    trainable parameters per fold) into 'training_outputs/'.
     """
 
     @staticmethod
@@ -83,9 +83,11 @@ class Training:
         mlflow_path: Path = OUTPUT_DIR / "mlflow"
         TrainingUtils.create_path(path=mlflow_path)
 
-        mlflow_experiment_name: str = f"fold_{fold_num}"
-        mlflow_uri: str = f"sqlite:///{mlflow_path / f'fold_{fold_num}.db'}"
-        run_name: str = f"fold_{fold_num}"
+        run_name_prefix: str = training_config['training']['name']
+
+        mlflow_experiment_name: str = f"{run_name_prefix}_fold_{fold_num}"
+        mlflow_uri: str = f"sqlite:///{mlflow_path / f'{run_name_prefix}_fold_{fold_num}.db'}"
+        run_name: str = f"{run_name_prefix}_fold_{fold_num}"
 
         mlflow_logger = MLFlowLogger(
             experiment_name=mlflow_experiment_name,
@@ -94,9 +96,9 @@ class Training:
         )
 
         p1_early_stopping = EarlyStopping(
-            monitor="val_auprc_bacteria",
-            mode="max",
-            patience=training_config['hyperparameters']['lr_es_patience'],
+            monitor="val_loss",
+            mode="min",
+            patience=training_config['hyperparameters']['lr_es_patience_phase1'],
             verbose=True
         )
 
@@ -108,7 +110,7 @@ class Training:
         TrainingUtils.create_path(path=checkpoint_path_per_fold)
         checkpoint = ModelCheckpoint(
             dirpath=checkpoint_path_per_fold,
-            filename=f"{training_config['training']['name']}_fold_{fold_num}",
+            filename=f"{run_name_prefix}_fold_{fold_num}",
             monitor="val_auprc_bacteria",
             mode="max",
             save_top_k=1,
@@ -145,9 +147,9 @@ class Training:
 
         #  Reinitializing the Early Stopping for phase 2
         p2_early_stopping = EarlyStopping(
-            monitor="val_auprc_bacteria",
-            mode="max",
-            patience=training_config['hyperparameters']['lr_es_patience'],
+            monitor="val_loss",
+            mode="min",
+            patience=training_config['hyperparameters']['lr_es_patience_phase2'],
             verbose=True
         )
         p2_callbacks: list = [p2_early_stopping, best_metric_tracker, checkpoint]
@@ -220,9 +222,13 @@ class Training:
                 "std": round(float(np.std(values)), 2)
             }
         best_results_dict: dict = {
-            "date": datetime.now().isoformat(),
+            "date": datetime.now().strftime('%Y-%m-%d_%Hh%M'),
             "run_name": training_config['training']['name'],
-            "metrics_summary": metrics_summary
+            "metrics_summary": metrics_summary,
+            "folds": {
+                fold_num: {k: v for k, v in results.items() if k in metrics_names}
+                for fold_num, results in fold_best_results.items()
+            },
         }
 
         # Saving or updating the dictionnary summerizing
@@ -240,12 +246,12 @@ class Training:
 
         # Saving the time and execution and number of parameters for each fold
         execution_summary: dict = {
-            "date": datetime.now().isoformat(),
+            "date": datetime.now().strftime('%Y-%m-%d_%Hh%M'),
             "run_name": training_config['training']['name'],
             "folds": {
                 fold_num: {
-                    "training_time_min": results["training_time_min"],
-                    "num_trainable_params": results["num_trainable_params"]
+                    "execution_time_min": results["execution_time"],
+                    "num_trainable_params": results["num_params"]
                 }
                 for fold_num, results in fold_best_results.items()
             }
@@ -270,6 +276,8 @@ class Training:
         """
         preprocessing_config: dict = ConfigUtils.load_config('preprocessing_config.yaml')
         training_config: dict = ConfigUtils.load_config('training_config.yaml')
+
+        L.seed_everything(preprocessing_config['split']['seed'], workers=True)
 
         Training.run_step1_print_dataloader_lengths(
             preprocessing_config=preprocessing_config, 

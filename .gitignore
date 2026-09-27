@@ -20,6 +20,10 @@ data/raw/*
 # Models and logs
 models/*
 !models/.gitkeep
+!models/checkpoint/
+!models/checkpoint/per_fold/
+models/checkpoint/per_fold/*
+!models/checkpoint/per_fold/.gitkeep
 
 # macOS
 .DS_Store

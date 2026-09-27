@@ -74,7 +74,7 @@ class ChestXRayLightningModule(L.LightningModule):
             num_classes=self.training_config['model']['num_classes'], 
             beta=2.0, 
             average=None
-        )     
+        ) 
 
     def forward(
         self, 
@@ -117,7 +117,6 @@ class ChestXRayLightningModule(L.LightningModule):
 
         return training_loss
             
-
     def validation_step(
         self, 
         batch: Optional[tuple[torch.Tensor, Optional[torch.Tensor]]], 
@@ -149,7 +148,6 @@ class ChestXRayLightningModule(L.LightningModule):
         self.recall.update(probs, labels)
         self.f2.update(probs, labels)
 
-
     def on_validation_epoch_end(
         self
     ) -> None:
@@ -170,30 +168,13 @@ class ChestXRayLightningModule(L.LightningModule):
         for metric in (self.auprc, self.recall_macro, self.f2_macro, self.recall, self.f2):
             metric.reset()
 
-        
-    def test_step(
-        self, 
-        batch: Optional[tuple[torch.Tensor, Optional[torch.Tensor]]], 
-        batch_idx: int
-    ) -> torch.Tensor:
-        """
-        Computes and logs the test metrics for this batch. TO DO
-
-        Args:
-            batch: Loaded validation batch of the image and label tensors.
-            batch_idx: Batch index (unused).
-        """
-        images, labels = batch
-        preds = self(images)
-        probs = torch.softmax(preds, dim=1)
-
-
     def configure_optimizers(
         self
         ) -> OptimizerLRSchedulerConfig:
         """
         Builds the optimizer from the config file, on
-        currently trainable parameters, using the available LR.
+        currently trainable parameters, using the available 
+        LR for the training phase.
 
         Returns:
             The configuration of the learning rate scheduler.
@@ -205,6 +186,7 @@ class ChestXRayLightningModule(L.LightningModule):
             weight_decay=self.training_config['hyperparameters']['weight_decay']
         )
 
+        # Scheduler to reduce by half the LR value if no improvement is seen on the val loss
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
             patience=self.training_config['hyperparameters']['lr_scheduler_patience'],

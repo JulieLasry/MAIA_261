@@ -1,0 +1,18 @@
+{
+    "date": "2026-09-27_12h55",
+    "best_fold": 1,
+    "threshold_scenarios": {
+        "global_performance": {
+            "threshold": 0.77,
+            "tpr": 1.0,
+            "fpr": 0.03
+        },
+        "clinically_cautious": {
+            "threshold": 0.86,
+            "tpr": 0.96,
+            "fpr": 0.0
+        }
+    },
+    "mean_uncertainty_corrects": 0.01,
+    "mean_uncertainty_incorrects": 0.09
+}

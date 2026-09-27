@@ -1,0 +1,201 @@
+{
+    "date": "2026-09-27_12h54",
+    "run_name": "baseline",
+    "folds": {
+        "1": {
+            "classification_report": {
+                "accuracy": 0.97,
+                "macro avg": {
+                    "precision": 0.97,
+                    "recall": 0.96,
+                    "f1-score": 0.97,
+                    "support": 63.0,
+                    "f2_score": 0.97
+                },
+                "weighted avg": {
+                    "precision": 0.97,
+                    "recall": 0.97,
+                    "f1-score": 0.97,
+                    "support": 63.0
+                },
+                "Normal": {
+                    "precision": 1.0,
+                    "recall": 0.96,
+                    "f1-score": 0.98,
+                    "support": 24.0,
+                    "f2_score": 0.97
+                },
+                "Bacteria": {
+                    "precision": 0.92,
+                    "recall": 1.0,
+                    "f1-score": 0.96,
+                    "support": 24.0,
+                    "f2_score": 0.98
+                },
+                "Virus": {
+                    "precision": 1.0,
+                    "recall": 0.93,
+                    "f1-score": 0.97,
+                    "support": 15.0,
+                    "f2_score": 0.95
+                }
+            },
+            "clinical_report": {
+                "Normal": {
+                    "se": 0.96,
+                    "sp": 1.0,
+                    "ppv": 1.0,
+                    "npv": 0.98
+                },
+                "Bacteria": {
+                    "se": 1.0,
+                    "sp": 0.95,
+                    "ppv": 0.92,
+                    "npv": 1.0
+                },
+                "Virus": {
+                    "se": 0.93,
+                    "sp": 1.0,
+                    "ppv": 1.0,
+                    "npv": 0.98
+                }
+            }
+        },
+        "2": {
+            "classification_report": {
+                "accuracy": 0.94,
+                "macro avg": {
+                    "precision": 0.94,
+                    "recall": 0.93,
+                    "f1-score": 0.93,
+                    "support": 63.0,
+                    "f2_score": 0.93
+                },
+                "weighted avg": {
+                    "precision": 0.94,
+                    "recall": 0.94,
+                    "f1-score": 0.94,
+                    "support": 63.0
+                },
+                "Normal": {
+                    "precision": 0.96,
+                    "recall": 0.96,
+                    "f1-score": 0.96,
+                    "support": 24.0,
+                    "f2_score": 0.96
+                },
+                "Bacteria": {
+                    "precision": 0.92,
+                    "recall": 0.96,
+                    "f1-score": 0.94,
+                    "support": 24.0,
+                    "f2_score": 0.95
+                },
+                "Virus": {
+                    "precision": 0.93,
+                    "recall": 0.87,
+                    "f1-score": 0.9,
+                    "support": 15.0,
+                    "f2_score": 0.88
+                }
+            },
+            "clinical_report": {
+                "Normal": {
+                    "se": 0.96,
+                    "sp": 0.97,
+                    "ppv": 0.96,
+                    "npv": 0.97
+                },
+                "Bacteria": {
+                    "se": 0.96,
+                    "sp": 0.95,
+                    "ppv": 0.92,
+                    "npv": 0.97
+                },
+                "Virus": {
+                    "se": 0.87,
+                    "sp": 0.98,
+                    "ppv": 0.93,
+                    "npv": 0.96
+                }
+            }
+        },
+        "3": {
+            "classification_report": {
+                "accuracy": 0.87,
+                "macro avg": {
+                    "precision": 0.87,
+                    "recall": 0.87,
+                    "f1-score": 0.86,
+                    "support": 63.0,
+                    "f2_score": 0.87
+                },
+                "weighted avg": {
+                    "precision": 0.89,
+                    "recall": 0.87,
+                    "f1-score": 0.88,
+                    "support": 63.0
+                },
+                "Normal": {
+                    "precision": 1.0,
+                    "recall": 0.83,
+                    "f1-score": 0.91,
+                    "support": 24.0,
+                    "f2_score": 0.86
+                },
+                "Bacteria": {
+                    "precision": 0.88,
+                    "recall": 0.92,
+                    "f1-score": 0.9,
+                    "support": 24.0,
+                    "f2_score": 0.91
+                },
+                "Virus": {
+                    "precision": 0.72,
+                    "recall": 0.87,
+                    "f1-score": 0.79,
+                    "support": 15.0,
+                    "f2_score": 0.83
+                }
+            },
+            "clinical_report": {
+                "Normal": {
+                    "se": 0.83,
+                    "sp": 1.0,
+                    "ppv": 1.0,
+                    "npv": 0.91
+                },
+                "Bacteria": {
+                    "se": 0.92,
+                    "sp": 0.92,
+                    "ppv": 0.88,
+                    "npv": 0.95
+                },
+                "Virus": {
+                    "se": 0.87,
+                    "sp": 0.9,
+                    "ppv": 0.72,
+                    "npv": 0.96
+                }
+            }
+        }
+    },
+    "summary": {
+        "accuracy": {
+            "mean": 0.93,
+            "std": 0.04
+        },
+        "macro_recall": {
+            "mean": 0.92,
+            "std": 0.04
+        },
+        "macro_f2": {
+            "mean": 0.92,
+            "std": 0.04
+        },
+        "bacteria_recall": {
+            "mean": 0.96,
+            "std": 0.03
+        }
+    }
+}

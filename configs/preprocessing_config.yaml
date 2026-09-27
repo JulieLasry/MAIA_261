@@ -1,6 +1,8 @@
-data:
+paths:
   base_dir: data/raw
   output_dir: data/preprocessed
+
+data:
   target_size: 224
   clipLimit: 2.0
   tileGridSize: 8

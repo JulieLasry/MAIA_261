@@ -9,19 +9,17 @@ set and stratified cross-validation folds for training.
 All the preprocessed samples are saved under the same path.
 
 # Commands
-To run the full pipeline from the project root:
+To run the full preprocessing pipeline from the project root:
 ```bash
 python preprocessing.py
 ```
 
 # Steps
-
 - Step 1 : Image resizing and CLAHE contrast enhancement
 - Step 2 : Preprocessed dataset Json file creation (paths and labels)
 - Step 3 : Stratified train/test split and K-Fold cross-validation splits
 
 # Steps details
-
 - Step 1 :
   Resizing each raw image to a fixed target size while preserving
   its aspect ratio (padding), then applying CLAHE contrast
@@ -39,14 +37,12 @@ python preprocessing.py
   data/preprocessed/splits.json.
 
 # Data output architecture
-
 data/preprocessed/
 ├── check-X-ray/         # resized and CLAHE-enhanced images
 ├── dataset.json         # {filename: [image_path, label]}
 └── splits.json          # {"test": [...], "folds": {fold_num: {"train": [...], "val": [...]}}}
 
 # Important notes
-
 All parameters (target size, CLAHE, split ratio, seed, number of
 folds) are set in configs/preprocessing_config.yaml. This
 pipeline requires data/raw/ to already contain the raw images

@@ -60,18 +60,21 @@ class TestUncertainty:
             for _ in range(n_passes):
                 all_probs: list = []
                 for images, _ in datamodule.test_dataloader():
+                    device = next(lightning_module.parameters()).device
+                    images = images.to(device)
+
                     logits = lightning_module(images)
                     probs = torch.softmax(logits, dim=1)
                     all_probs.append(probs)
+
                 all_passes_probs.append(torch.cat(all_probs))
+
             probs_passes_tensor = torch.stack(all_passes_probs)
-            mean_probs = probs_passes_tensor.mean(dim=0).numpy()
-            std_probs = probs_passes_tensor.std(dim=0).numpy()
+            mean_probs = probs_passes_tensor.mean(dim=0).cpu().numpy()
+            std_probs = probs_passes_tensor.std(dim=0).cpu().numpy()
 
         return {
             "mean_probs": mean_probs,
             "std_probs": std_probs
         }
         
-        
-

@@ -24,7 +24,17 @@ class ChestXRayBestMetricTracker(L.Callback):
     ) -> None:
         """
         Checks if this epoch improved the tracked best AUPRC
-        (bacteria class), and if so, saves the other metrics.
+        (bacteria class), and if so, saves the other metrics
+        logged at that same epoch.
+
+        Args:
+            trainer (L.Trainer): The Lightning Trainer, used to access
+            the epoch's logged metrics (trainer.callback_metrics).
+            l_module (L.LightningModule): The LightningModule being
+            trained (unused here, required by the Callback hook signature).
+
+        Returns:
+            None.
         """
         metrics = trainer.callback_metrics
         val_auprc_bacteria = metrics.get("val_auprc_bacteria")

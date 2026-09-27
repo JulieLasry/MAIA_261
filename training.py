@@ -9,9 +9,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from lightning.pytorch.loggers import MLFlowLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 
-from src.utils.config_utils import ConfigUtils
-from src.utils.training_utils import TrainingUtils, OUTPUT_DIR, MODEL_DIR
-
+from src.utils.common_utils import CommonUtils
 from src.data.datamodule import ChestXRayDataModule
 from src.models.model import ChestXRayModel
 from src.training.lightning_module import ChestXRayLightningModule
@@ -24,9 +22,9 @@ class Training:
     fold in two phases (frozen feature extractor, then progressive
     fine-tuning). Step 1 validates the data/split by printing the
     dataloader lengths per fold. Step 2 trains each fold, saving
-    checkpoints into 'models/', MLflow logs under 'training_outputs/mlflow'
+    checkpoints into 'models/', MLflow logs under 'outputs/train/mlflow'
     and two Json summaries (best metrics and training time with number of
-    trainable parameters per fold) into 'training_outputs/'.
+    trainable parameters per fold) into 'outputs/train/'.
     """
 
     @staticmethod
@@ -69,6 +67,8 @@ class Training:
             parameter count).
         """
         start_time: float = time.perf_counter()
+        train_dir: Path = Path(training_config['paths']['output_dir'])
+        model_dir: Path = Path(training_config['paths']['model_dir'])
 
         # Instanciating the datamodule and the model
         datamodule: ChestXRayDataModule = ChestXRayDataModule(
@@ -80,8 +80,8 @@ class Training:
         model = ChestXRayModel(training_config=training_config)
 
         # Setting up the MLflow logger and Callbacks (Early Stopping, Metrics tracker, Ckpt)
-        mlflow_path: Path = OUTPUT_DIR / "mlflow"
-        TrainingUtils.create_path(path=mlflow_path)
+        mlflow_path: Path = train_dir / "mlflow"
+        CommonUtils.create_path(path=mlflow_path)
 
         run_name_prefix: str = training_config['training']['name']
 
@@ -95,19 +95,12 @@ class Training:
             run_name=run_name
         )
 
-        p1_early_stopping = EarlyStopping(
-            monitor="val_loss",
-            mode="min",
-            patience=training_config['hyperparameters']['lr_es_patience_phase1'],
-            verbose=True
-        )
-
         best_metric_tracker = ChestXRayBestMetricTracker()
 
-        checkpoint_path: Path = MODEL_DIR / "checkpoint"
-        TrainingUtils.create_path(path=checkpoint_path)
+        checkpoint_path: Path = model_dir / "checkpoint"
+        CommonUtils.create_path(path=checkpoint_path)
         checkpoint_path_per_fold = checkpoint_path / "per_fold"
-        TrainingUtils.create_path(path=checkpoint_path_per_fold)
+        CommonUtils.create_path(path=checkpoint_path_per_fold)
         checkpoint = ModelCheckpoint(
             dirpath=checkpoint_path_per_fold,
             filename=f"{run_name_prefix}_fold_{fold_num}",
@@ -118,16 +111,23 @@ class Training:
             enable_version_counter=False,
             verbose=True
         )
+
+        # Phase 1 - frozen backbone
+        p1_early_stopping = EarlyStopping(
+            monitor="val_loss",
+            mode="min",
+            patience=training_config['hyperparameters']['lr_es_patience_phase1'],
+            verbose=True
+        )
+
         p1_callbacks: list = [p1_early_stopping, best_metric_tracker, checkpoint]
 
-        # Creating the Lightning module and the Trainer
         train_labels: list[int] = [label for _, label in datamodule.train_dataset.samples]
         class_weights: torch.tensor = torch.tensor(
             compute_class_weight(class_weight='balanced', classes=np.array([0,1,2]), y=train_labels),
             dtype=torch.float32
         )
 
-        # Phase 1 - frozen backbone
         p1_ligntning_module = ChestXRayLightningModule(
             model=model,
             training_config=training_config,
@@ -198,8 +198,9 @@ class Training:
         then saves the combined summary of all folds 
         and a time execution and number of model
         parameters summary into two Json files  
-        in 'training_outpus/'.
+        in 'outputs/train/'.
         """
+        train_dir: Path = Path(training_config['paths']['output_dir'])
         fold_best_results: dict[int, dict] = {}
         for fold_num in range(1, preprocessing_config['split']['n_folds'] + 1):
             fold_best_results[fold_num] = Training.run_fold(
@@ -233,7 +234,7 @@ class Training:
 
         # Saving or updating the dictionnary summerizing
         # the metrics best results across all folds into a Json
-        best_result_json_path: Path = OUTPUT_DIR / "best_results.json"
+        best_result_json_path: Path = train_dir / "train_results.json"
         if best_result_json_path.is_file():
             with open(best_result_json_path, "r", encoding="utf-8") as f:
                 all_best_results = json.load(f)
@@ -257,7 +258,7 @@ class Training:
             }
         }
 
-        execution_json_path: Path = OUTPUT_DIR / "execution_results.json"
+        execution_json_path: Path = train_dir / "execution_results.json"
         if execution_json_path.is_file():
             with open(execution_json_path, "r", encoding="utf-8") as f:
                 execution_results = json.load(f)
@@ -274,8 +275,8 @@ class Training:
         """
         Loads the configs and runs step 1 then step 2.
         """
-        preprocessing_config: dict = ConfigUtils.load_config('preprocessing_config.yaml')
-        training_config: dict = ConfigUtils.load_config('training_config.yaml')
+        preprocessing_config: dict = CommonUtils.load_config('preprocessing_config.yaml')
+        training_config: dict = CommonUtils.load_config('training_config.yaml')
 
         L.seed_everything(preprocessing_config['split']['seed'], workers=True)
 

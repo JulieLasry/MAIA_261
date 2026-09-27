@@ -42,13 +42,14 @@ Creating label counts plots to visualize class imbalance and printing
 the exact number of samples per category.
 
 - Step 5 : 
-Visualizing 6 random images per category, to inspect le laterality, 
-the image sizes and if they are cenetered.
+Visualizing 6 random images per category, to inspect the laterality, 
+the image sizes and if they are centered.
 
 - Step 6 : 
 Inspecting the image format, photometry and dtype, while plotting the
-image sizes (width and height) histograms. Information about the min,
-max and mode of the images' dimensions is available. 
+image sizes (width and height) histograms for all the data and all the 
+classes. Information about the min, max and mode of the images' 
+dimensions is available. 
 
 - Step 7 : 
 Looking for the resolution (and thus pixel spacing) value in the files'

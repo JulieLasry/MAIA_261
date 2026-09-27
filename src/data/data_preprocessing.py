@@ -5,7 +5,7 @@ import cv2 as cv
 import os
 import pandas as pd
 
-from src.utils.preprocessing_utils import PreprocessingUtils
+from src.utils.common_utils import CommonUtils
 
 class DataPreprocessing:
     """ 
@@ -66,14 +66,15 @@ class DataPreprocessing:
         Returns:
             None.
         """
-        raw_images_path: Path = Path(preprocessing_config['data']['base_dir']) / 'check-X-ray'
-        preprocessed_output_path: Path = Path(preprocessing_config['data']['output_dir']) / 'check-X-ray'
+        raw_images_path: Path = Path(preprocessing_config['paths']['base_dir']) / 'check-X-ray'
+        preprocessed_output_path: Path = Path(preprocessing_config['paths']['output_dir']) / 'check-X-ray'
         os.makedirs(preprocessed_output_path, exist_ok=True)
 
         # Checking once again if all raw files are valid and printing invalid cases
         invalid_images: list[Path] = []
 
-        # Browsing the entire dataset of files to preprocess them
+        # Browsing the entire dataset of files to preprocess them while checking 
+        # if they are valid
         for image_path in raw_images_path.glob('*'):
             try:
                 with Image.open(image_path) as im:
@@ -106,8 +107,8 @@ class DataPreprocessing:
         Returns:
             None.
         """
-        preprocessed_files_path: Path = Path(preprocessing_config['data']['output_dir']) / 'check-X-ray'
-        csv_file_path: Path = Path(preprocessing_config['data']['base_dir'])
+        preprocessed_files_path: Path = Path(preprocessing_config['paths']['output_dir']) / 'check-X-ray'
+        csv_file_path: Path = Path(preprocessing_config['paths']['base_dir'])
         csv_file: pd.DataFrame = pd.read_csv(csv_file_path / "data_info.csv", header=0, index_col=0)
 
         # Creating a dictionary to combine filenames with their labels
@@ -133,8 +134,8 @@ class DataPreprocessing:
                     filenames_labels_dict[image_path.name]
                 ]
 
-        json_dataset_path: Path = Path(preprocessing_config['data']['output_dir']) / "dataset.json"
-        PreprocessingUtils.json_saving(
+        json_dataset_path: Path = Path(preprocessing_config['paths']['output_dir']) / "dataset.json"
+        CommonUtils.json_saving(
             json_file=json_dataset,
             json_file_path=json_dataset_path
         )

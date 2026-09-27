@@ -1,17 +1,17 @@
 {
-    "date": "2026-09-26T08:54:07.245740",
+    "date": "2026-09-27_10h14",
     "run_name": "baseline",
     "folds": {
         "1": {
-            "execution_time_min": 3.74,
+            "execution_time_min": 2.24,
             "num_trainable_params": 22069251
         },
         "2": {
-            "execution_time_min": 2.6,
+            "execution_time_min": 2.61,
             "num_trainable_params": 22069251
         },
         "3": {
-            "execution_time_min": 1.91,
+            "execution_time_min": 1.55,
             "num_trainable_params": 22069251
         }
     }

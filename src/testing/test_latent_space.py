@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from pathlib import Path
 from umap import UMAP
 
@@ -30,11 +31,13 @@ class TestLatentSpace:
             np.ndarray
             The 2D projected embeddings.
         """
-        reducer = UMAP(n_components=2, random_state=testing_config['latent_space']['seed']) 
+        reducer = UMAP(
+            n_components=2, 
+            random_state=testing_config['latent_space']['seed']
+        ) 
         embeddings_2d = reducer.fit_transform(embeddings)
         return embeddings_2d
         
-
     @staticmethod
     def plot_latent_space(
         embeddings_2d: np.ndarray,
@@ -56,38 +59,33 @@ class TestLatentSpace:
             testing.
             output_path (Path): The path to save the plotted figure.
         """
-        # Maps the predicted true labels 
-        correct: np.ndarray = (labels == preds)  
+        correct: np.ndarray = (labels == preds)
 
         class_labels: list[int] = testing_config['classes']['labels']
         class_names: list[str] = testing_config['classes']['label_names']
+        colors = cm.viridis(np.linspace(0, 1, 3))
 
         plt.figure(figsize=(10, 8))
-
-        # Per-class symbol
-        markers: list[str] = ['o', 's', '^']
-
-        for (class_idx, class_name), marker in zip(zip(class_labels, class_names), markers):
+        # Plotting the 2D latent space with correct and incorrect group of samples
+        for class_idx, class_name, color in zip(class_labels, class_names, colors):
             class_mask = (labels == class_idx)
 
-            # Corectly classified samples
             mask_correct = class_mask & correct
             plt.scatter(
                 embeddings_2d[mask_correct, 0],
                 embeddings_2d[mask_correct, 1],
-                marker=marker,
-                color='green',
+                marker='o',
+                color=color,
                 label=f'{class_name} - correct',
                 alpha=0.7
             )
 
-            # Misclassified samples
-            mask_incorrect = class_mask & ~correct 
+            mask_incorrect = class_mask & ~correct
             plt.scatter(
                 embeddings_2d[mask_incorrect, 0],
                 embeddings_2d[mask_incorrect, 1],
-                marker=marker,
-                color='red',
+                marker='x',
+                color=color,
                 label=f'{class_name} - incorrect',
                 alpha=0.7
             )
@@ -96,6 +94,5 @@ class TestLatentSpace:
         plt.ylabel('Dimension 2')
         plt.title('Latent Space Visualization')
         plt.legend()
-        plt.savefig(output_path)
+        plt.savefig(output_path / "latent_space.png")
         plt.close()
-        

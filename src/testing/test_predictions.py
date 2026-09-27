@@ -53,7 +53,6 @@ class TestPredictions:
         lightning_module.eval()
         return lightning_module
 
-
     @staticmethod
     def collect_test_predictions(
         lightning_module: ChestXRayLightningModule,
@@ -80,9 +79,13 @@ class TestPredictions:
 
         with torch.no_grad():
             for images, labels in datamodule.test_dataloader():
+                device = next(lightning_module.parameters()).device
+                images = images.to(device)
+
                 logits = lightning_module(images)
                 probs = torch.softmax(logits, dim=1)
                 preds = torch.argmax(probs, dim=1)
+
                 embeddings = lightning_module.model.return_embedding(images)
 
                 all_probs.append(probs)
@@ -91,8 +94,8 @@ class TestPredictions:
                 all_embeddings.append(embeddings)
 
         return {
-            "probs": torch.cat(all_probs).numpy(),
-            "preds": torch.cat(all_preds).numpy(),
-            "labels": torch.cat(all_labels).numpy(),
-            "embeddings": torch.cat(all_embeddings).numpy(),
+            "probs": torch.cat(all_probs).cpu().numpy(),
+            "preds": torch.cat(all_preds).cpu().numpy(),
+            "labels": torch.cat(all_labels).cpu().numpy(),
+            "embeddings": torch.cat(all_embeddings).cpu().numpy(),
         }

@@ -1,0 +1,56 @@
+{
+    "date": "2026-09-27_10h14",
+    "run_name": "baseline",
+    "metrics_summary": {
+        "val_auprc_bacteria": {
+            "mean": 0.95,
+            "std": 0.04
+        },
+        "val_loss": {
+            "mean": 0.41,
+            "std": 0.11
+        },
+        "val_recall_bacteria": {
+            "mean": 0.95,
+            "std": 0.02
+        },
+        "val_f2_bacteria": {
+            "mean": 0.94,
+            "std": 0.01
+        },
+        "val_recall_macro": {
+            "mean": 0.88,
+            "std": 0.02
+        },
+        "val_f2_macro": {
+            "mean": 0.88,
+            "std": 0.02
+        }
+    },
+    "folds": {
+        "1": {
+            "val_auprc_bacteria": 0.9853852987289429,
+            "val_loss": 0.2791028618812561,
+            "val_recall_bacteria": 0.9726027250289917,
+            "val_f2_bacteria": 0.9646739363670349,
+            "val_recall_macro": 0.8913004398345947,
+            "val_f2_macro": 0.8928890228271484
+        },
+        "2": {
+            "val_auprc_bacteria": 0.9753789901733398,
+            "val_loss": 0.38356316089630127,
+            "val_recall_bacteria": 0.931506872177124,
+            "val_f2_bacteria": 0.9340659379959106,
+            "val_recall_macro": 0.8955672383308411,
+            "val_f2_macro": 0.8955520391464233
+        },
+        "3": {
+            "val_auprc_bacteria": 0.8928477764129639,
+            "val_loss": 0.5533433556556702,
+            "val_recall_bacteria": 0.9583333134651184,
+            "val_f2_bacteria": 0.934959352016449,
+            "val_recall_macro": 0.8469576835632324,
+            "val_f2_macro": 0.8481718301773071
+        }
+    }
+}

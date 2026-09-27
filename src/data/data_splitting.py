@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 from sklearn.model_selection import train_test_split, StratifiedKFold
 
-from src.utils.preprocessing_utils import PreprocessingUtils
+from src.utils.common_utils import CommonUtils
 
 class DataSplitting:
     """ 
@@ -61,7 +61,7 @@ class DataSplitting:
             dataset_json_path=dataset_json_path
         )
 
-        # Obtaining the filenames ad labels in the dataset dict
+        # Obtaining the filenames and labels in the dataset dict
         filenames: list[str] = list(dataset_dict.keys())
         labels: list[int] = [dataset_dict[filename][1] for filename in filenames]
         indices: list[int] = list(range(len(filenames)))
@@ -138,8 +138,8 @@ class DataSplitting:
         json_splits["test"] = test_indices
         json_splits["folds"] = folds
         
-        json_splits_path: Path = Path(preprocessing_config['data']['output_dir']) / "splits.json"
-        PreprocessingUtils.json_saving(
+        json_splits_path: Path = Path(preprocessing_config['paths']['output_dir']) / "splits.json"
+        CommonUtils.json_saving(
             json_file=json_splits,
             json_file_path=json_splits_path
         )

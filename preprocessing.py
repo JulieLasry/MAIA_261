@@ -1,8 +1,8 @@
+import cv2 as cv
 from pathlib import Path
 from src.data.data_preprocessing import DataPreprocessing
 from src.data.data_splitting import DataSplitting
-from src.utils.preprocessing_utils import PreprocessingUtils
-from src.utils.config_utils import ConfigUtils
+from src.utils.common_utils import CommonUtils
 
 class Preprocessing:
     """
@@ -11,6 +11,30 @@ class Preprocessing:
     then splits the data into a stratified test set and stratified
     K-Fold cross-validation folds.
     """
+
+    @staticmethod
+    def _clahe_creation(
+        preprocessing_config: dict
+    ) -> cv.CLAHE:
+        """
+        Creating a CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        object, to be reused across all images.
+
+        Args:
+            preprocessing_config (dict): The dict of the preprocessing main paths 
+            and variable values in preprocess. 
+
+        Returns:
+            cv.CLAHE
+            The configured CLAHE object.
+        """
+        return cv.createCLAHE(
+            clipLimit=preprocessing_config['data']['clipLimit'], 
+            tileGridSize=(
+                preprocessing_config['data']['tileGridSize'], 
+                preprocessing_config['data']['tileGridSize']
+            )
+        )
 
     @staticmethod
     def run_step1_preprocess_images(preprocessing_config: dict) -> None:
@@ -27,7 +51,7 @@ class Preprocessing:
         """
         DataPreprocessing.dataset_preprocessing(
             preprocessing_config=preprocessing_config,
-            clahe=PreprocessingUtils.clahe_creation(
+            clahe=Preprocessing._clahe_creation(
                 preprocessing_config=preprocessing_config
             )
         )
@@ -63,7 +87,7 @@ class Preprocessing:
         Returns:
             None
         """
-        dataset_json_path: Path = Path(preprocessing_config['data']['output_dir']) / "dataset.json"
+        dataset_json_path: Path = Path(preprocessing_config['paths']['output_dir']) / "dataset.json"
         try:
             train_val_indices, test_indices, labels = DataSplitting.split_train_test(
                 dataset_json_path=dataset_json_path,
@@ -93,7 +117,7 @@ class Preprocessing:
         Returns:
             None
         """
-        preprocessing_config: dict = ConfigUtils.load_config('preprocessing_config.yaml')
+        preprocessing_config: dict = CommonUtils.load_config('preprocessing_config.yaml')
 
         Preprocessing.run_step1_preprocess_images(preprocessing_config=preprocessing_config)
         Preprocessing.run_step2_save_dataset_json(preprocessing_config=preprocessing_config)

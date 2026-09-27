@@ -41,10 +41,6 @@ class ChestXRayModel(nn.Module):
         for param in self.backbone.fc.parameters():
             param.requires_grad = True
 
-        n = sum(p.numel() for p in self.backbone.parameters() if p.requires_grad)
-        print(f"Number of trainable parameters : {n}")
-
-
     def unfreeze_last_stages(
         self,
         num_stages: int,
@@ -52,12 +48,10 @@ class ChestXRayModel(nn.Module):
         """
         Progressively unfreezes only the last residual 
         layer groups of the backbone (from layer 4 to max layer 1 
-        for a global finetuning). While not selecting more than 3 
-        layers to unfreeze for a progressive finetuning. Thus, earlier 
-        layers are still intact. 
+        for a global finetuning).
 
         Args:
-            num_blocks (int): Number of residual layers to
+            num_stages (int): Number of residual layers to
             unfreeze in phase 2 (max 4 : layer1 to layer4).
         """
         resnet_layers = [
@@ -67,7 +61,6 @@ class ChestXRayModel(nn.Module):
         for layer in resnet_layers[-num_stages:]:
             for param in layer.parameters():
                 param.requires_grad = True
-
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -82,7 +75,6 @@ class ChestXRayModel(nn.Module):
             The raw classification logits for each image.
         """
         return self.backbone(x)
-
 
     def return_embedding(self, x: torch.Tensor) -> torch.Tensor:
         """

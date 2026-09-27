@@ -20,23 +20,22 @@ predictions.
 
 Requires Python 3.10.12
 
-**macOS / Linux**
 ```bash
 git clone https://github.com/JulieLasry/MAIA_261.git
 cd MAIA_261
 python3.10 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 ```
 
-**Windows**
-```powershell
+Windows
 git clone https://github.com/JulieLasry/MAIA_261.git
 cd MAIA_261
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-```
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
 ## Data
 Please place the raw data provided as part of this technical interview,
@@ -48,78 +47,79 @@ data/raw/
     └── *.tiff
 
 ## Execution and usage
-
-Run the preprocessing pipeline from the project root:
+Run the pipeline from the project root, in order:
 
 ```bash
 python preprocessing.py
+python training.py
+python testing.py
 ```
-This resizes and enhances (CLAHE) all raw images, saves them to
-data/preprocessed/check-X-ray/, builds dataset.json (image
-paths and labels), splits the data into a stratified test set and
-K-Fold cross-validation folds, and saves the split
-indices to splits.json.
 
-Training (python training.py) is in progress and will train the
-classifier for each fold, log metrics and artifacts to MLflow.
+<preprocessing.py> resizes and enhances (CLAHE) the raw images,
+builds dataset.json with all the images paths and labels and 
+the stratified splits.json file. <training.py> trains a ResNet-50 
+classifier per fold, in two phases, logging to MLflow. <testing.py>
+evaluates every fold's checkpoint on the test set, then runs an in-depth
+analysis (ROC/PRC, uncertainty, latent space) on the best fold. 
+See docs/preprocessing_readme.md, docs/training_readme.md and
+docs/testing_readme.md for details.
 
-Parameters are set in configs/:
+# Configuration files :
 
-┌───────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────┐
-│           File            │                                          Content                                          │
-├───────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┤
-│ preprocessing_config.yaml │ raw/output paths, target image size, CLAHE parameters, split ratio, seed, number of folds │
-├───────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────┤
-│ training_config.yaml      │ augmentations, normalization, dataloader parameters                                       │
-└───────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────┘
+Three configuration files were defined, highliting the various 
+parameters used in each pipeline:
+- <preprocessing_config.yaml> contains: raw/output paths, target image size, 
+                                        CLAHE parameters, split ratio, seed, 
+                                        number of folds 
+- <training.yaml> contains: model/hyperparaization, dataloader parameters
+- <testing.yaml> contains: class labels/naseed, output paths
 
-Project structure:
-├── configs/               # YAML configs (preprocessing, training)
-├── data/                  # raw and preprocessed data (not versioned)
-├── docs/                  # sub-readmes (notebooks, preprocessing)
-├── models/                # trained weights (not versioned)
-├── notebooks/             # data exploration
-├── src/data/               # preprocessing, splitting, augmentation, Dataset, DataModule
-├── src/models/             # model architecture
-├── src/utils/              # shared utilities
-├── preprocessing.py        # runs the preprocessing + splitting pipeline
-└── training.py              # runs the training pipeline (in progress)
+# Project structure:
+├── configs/            # YAML configs (preprocessing, training, testing)
+├── data/                # raw and preprocessed data (not versioned)
+├── docs/                # sub-readmes (notebooks, preprocessing, training, testing)
+├── models/              # trained checkpoints, per fold (not versioned)
+├── notebooks/           # data exploration
+├── outputs/             # MLflow logs, metrics and figures
+├── src/data/             # preprocessing, splitting, Dataset, DataModule
+├── src/models/           # model architecture (ResNet-50)
+├── src/training/         # Lightning module (training/validation steps)
+├── src/testing/          # test predictions, metrics, uncertainty, latent space
+├── src/callbacks/        # best-metrics tracking callback
+├── src/utils/            # shared utilities
+├── preprocessing.py      # runs the preprocessing + splitting pipeline
+├── training.py           # runs the training pipeline
+└── testing.py            # runs the test evaluation pipeline
 
-Used technologies
+# Used technologies
+- PyTorch: Deep learning framework
+- Lightning: Structures the data and training code (DataModule, LightningModule)
+- torchvision: ImageNet-pretrained ResNet-50 backbone
+- MLFlow: Experiment tracking 
+- Albumentations: Fast image augmentations  
+- OpenCV: CLAHE contrast enhancement   
+- scikit-learn: Stratified splits, K-fold cross-validation, classification metrics
+- UMAP: 2D latent space visualization
+- pandas / NumPy: Tabular data handling
+- Pillow / tifffile: Image loading and resizing
+- PyYAML: Configuration files
 
-┌───────────────────┬──────────────────────────────────────────────────────────────────────┐
-│    Technology     │                             Explanation                              │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ PyTorch           │ Deep learning framework                                              │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ Lightning         │ Structures the data and training code (DataModule, LightningModule)  │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ MONAI             │ Medical-imaging-specific model architectures (EfficientNet backbone) │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ Albumentations    │ Fast image augmentations and preprocessing                           │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ OpenCV            │ CLAHE contrast enhancement                                           │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ scikit-learn      │ Stratified splits and K-fold cross-validation                        │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ pandas / NumPy    │ Tabular data handling                                                │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ Pillow / tifffile │ Image loading                                                        │
-├───────────────────┼──────────────────────────────────────────────────────────────────────┤
-│ PyYAML            │ Config files                                                         │
-└───────────────────┴──────────────────────────────────────────────────────────────────────┘
 
-Planned: MLflow (experiment tracking). Optuna (hyperparameter
-search) is included as a dependency but not used yet.
+Optuna could be added as a future step for systematic
+hyperparameter search, currently done manually.
 
-Current features
+# Current features
 
-- Config-driven preprocessing pipeline, no hard-coded hyperparameters
-- CLAHE contrast enhancement and aspect-ratio-preserving resizing
+- Config-driven pipeline (preprocessing, training, testing), no hard-coded hyperparameters
+- CLAHE contrast enhancement and aspect-ratio
 - Corrupted/invalid file detection before and after preprocessing
-- Stratified test set, then stratified K-Fold cross-validation
-- Train-only augmentations (flip, affine, noise, brightness/contrast, blur)
-- One Lightning DataModule per fold
+- Stratified test set, then stratified K-Fold cross validation
+- Train-only augmentations (affine, noise, brightness/contrast, blur)
+- Two-phase transfer learning (frozen ResNet, then progressive fine-tuning)
+- Per-fold classification and clinical metrics (sensitivity, specificity, PPV, NPV)
+- One-vs-rest ROC/PRC curves and two clinically-motivated decisionthreshold scenarios
+- Monte Carlo Dropout uncertainty estimation on the test set
+- 2D latent space visualization (UMAP), separating correct versus incorrect predictions
 
 ## Contributors
 
@@ -128,9 +128,3 @@ Current features
 ## Author
 
 <Julie Lasry> — <juliexlasry@gmail.com>
-
-## Change log
-
-- **v0.1.0** — Initial data pipeline: raw loading, split, transforms,
-  Dataset and DataModule.
-

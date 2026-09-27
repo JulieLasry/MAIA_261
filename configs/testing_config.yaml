@@ -1,3 +1,7 @@
+paths:
+  metrics_dir: outputs/test/metrics
+  figures_dir: outputs/test/figures
+
 classes:
   labels: [0,1,2]
   label_names: ["Normal", "Bacteria", "Virus"]

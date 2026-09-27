@@ -26,7 +26,7 @@ class TestMetrics:
         preds: np.ndarray
     ) -> dict:
         """
-        Computes per-class + macro precision, recall,
+        Computes per-class and macro precision, recall,
         F1 and F2 scores.
 
         Args:
@@ -38,8 +38,7 @@ class TestMetrics:
 
         Returns:
             dict
-            The diction
-            ary of the classification metrics report.
+            The dictionary of the classification metrics report.
         """
         clf_report: dict = classification_report(
             y_true=labels,
@@ -77,7 +76,6 @@ class TestMetrics:
 
         return clf_report
         
-
     @staticmethod
     def compute_clinical_metrics(
         testing_config: dict,
@@ -124,7 +122,6 @@ class TestMetrics:
 
         return clinical_report
 
-
     @staticmethod
     def plot_confusion_matrix(
         testing_config: dict,
@@ -133,13 +130,13 @@ class TestMetrics:
         output_path: Path,
     ) -> None:
         """
-        Plots and saves the confusion matrix
+        Plots and saves the confusion matrix.
 
         Args:
             testing_config (dict): The dict of the main paths and
             variables used in testing.
             labels (np.ndarray): The true labels.
-            preds (np.ndarray): The predicted
+            preds (np.ndarray): The predicted labels. 
             output_path (Path): Path of the plotted figure (with .png).
 
         Returns:
@@ -155,9 +152,9 @@ class TestMetrics:
             display_labels=testing_config['classes']['label_names'])
 
         matrix_display.plot()
-        plt.savefig(output_path)
+        plt.title("Classifier Confusion Matrix", fontsize=14)
+        plt.savefig(output_path / "confusion_matrix.png")
         plt.close(matrix_display.figure_)
-
 
     @staticmethod
     def plot_roc_and_prc(
@@ -165,11 +162,10 @@ class TestMetrics:
         labels: np.ndarray,
         probs: np.ndarray,
         output_path: Path,
-    ) -> dict:
+    ) -> None:
         """
-        Plots the one-vs-rest ROC and Precision for
-        each class, and returns their AUROC/AUPRC 
-        values.
+        Plots the one-vs-rest ROC and Precision/Recall curves 
+        for each class, and displays their AUROC/AUPRC values.
 
         Args:
             testing_config (dict): The dict of the 
@@ -179,53 +175,49 @@ class TestMetrics:
             output_path (Path): Path to save the plotted figures.
 
         Returns:
-            dict
-            The dictionary of the classes AUROC and AUPRC.
+            None
         """
         class_labels: list[int] = testing_config['classes']['labels']
         class_names: list[str] = testing_config['classes']['label_names']
-        results: dict = {}
 
-        # Computing the PRC/ROCcurve with AUPRC/AUROC
-        # For each class
+        # PRC curve
+        plt.figure(figsize=(8, 6))
         for class_idx, class_name in zip(class_labels, class_names):
             binary_labels = (labels == class_idx).astype(int)
             class_probs = probs[:, class_idx]
 
-            # PRC curve with AUPRC
             precision, recall, _ = precision_recall_curve(binary_labels, class_probs)
             auprc = average_precision_score(binary_labels, class_probs)
 
-            plt.figure(figsize=(8, 6))
-            plt.plot(recall, precision, marker='.', label=f'AUPRC = {auprc:.3f}')
-            plt.xlabel('Recall')
-            plt.ylabel('Precision')
-            plt.title(f'Precision-Recall Curve - {class_name}')
-            plt.legend(loc='lower left')
-            plt.grid(True)
-            plt.savefig(output_path / f'prc_{class_name}.png')
-            plt.close()
+            plt.plot(recall, precision, marker='.', label=f'{class_name} (AUPRC = {auprc:.3f})')
 
-            # ROC curve with AUROC
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.title('Precision-Recall Curve - All classes', fontsize=14)
+        plt.legend(loc='lower left')
+        plt.grid(True)
+        plt.savefig(output_path / 'prc_all_classes.png')
+        plt.close()
+
+        # ROC curve
+        plt.figure(figsize=(8, 6))
+        for class_idx, class_name in zip(class_labels, class_names):
+            binary_labels = (labels == class_idx).astype(int)
+            class_probs = probs[:, class_idx]
+
             fpr, tpr, _ = roc_curve(binary_labels, class_probs)
             auroc = auc(fpr, tpr)
 
-            plt.figure(figsize=(8, 6))
-            plt.plot(fpr, tpr, marker='.', label=f'AUROC = {auroc:.3f}')
-            plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  # ligne "hasard"
-            plt.xlabel('False Positive Rate')
-            plt.ylabel('True Positive Rate')
-            plt.title(f'ROC Curve - {class_name}')
-            plt.legend(loc='lower right')
-            plt.grid(True)
-            plt.savefig(output_path / f'roc_{class_name}.png')
-            plt.close()
+            plt.plot(fpr, tpr, marker='.', label=f'{class_name} (AUROC = {auroc:.3f})')
 
-            results[class_name] = {"auroc": auroc, "auprc": auprc}
-
-        return results
-
-
+        plt.plot([0, 1], [0, 1], linestyle='--', color='gray')  
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('ROC Curve - All classes', fontsize=14)
+        plt.legend(loc='lower right')
+        plt.grid(True)
+        plt.savefig(output_path / 'roc_all_classes.png')
+        plt.close()
 
     @staticmethod
     def select_threshold_scenarios(
@@ -243,7 +235,7 @@ class TestMetrics:
             testing_config (dict): The dict of the 
             variables used in testing.
             labels (np.ndarray): The true labels.
-            probs (np.ndarray): The predicted labels.
+            probs (np.ndarray): The predicted class probabilities.
 
         Returns:
             dict
@@ -263,10 +255,10 @@ class TestMetrics:
         global_threshold = thresholds[best_global_idx]
 
         # Second case : more cautious on the recall of the bacteria-samples
-        target_recall: float = 0.95  
+        target_recall: float = 0.95  # arbitrary
         valid_indices = np.where(tpr >= target_recall)[0]  
-        cautious_idx = valid_indices[np.argmin(fpr[valid_indices])]
-        cautious_threshold = thresholds[cautious_idx]
+        clinically_cautious_idx = valid_indices[np.argmin(fpr[valid_indices])]
+        clinically_cautious_threshold = thresholds[clinically_cautious_idx]
 
         return {
             "global_performance": {
@@ -274,10 +266,10 @@ class TestMetrics:
                 "tpr": float(tpr[best_global_idx]),
                 "fpr": float(fpr[best_global_idx]),
             },
-            "cautious": {
-                "threshold": float(cautious_threshold),
-                "tpr": float(tpr[cautious_idx]),
-                "fpr": float(fpr[cautious_idx]),
+            "clinically_cautious": {
+                "threshold": float(clinically_cautious_threshold),
+                "tpr": float(tpr[clinically_cautious_idx]),
+                "fpr": float(fpr[clinically_cautious_idx]),
             },
         }
         

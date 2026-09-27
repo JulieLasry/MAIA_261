@@ -42,7 +42,7 @@ class ChestXRayDataModule(L.LightningDataModule):
         train/val indices and the fixed test indices into actual
         (path, label) samples, and builds the 3 Datasets.
         """
-        output_dir: Path = Path(self.preprocessing_config['data']['output_dir'])
+        output_dir: Path = Path(self.preprocessing_config['paths']['output_dir'])
         dataset_json: Path = output_dir / "dataset.json"
         splits_json: Path = output_dir / "splits.json"
 
@@ -63,7 +63,7 @@ class ChestXRayDataModule(L.LightningDataModule):
         self.train_dataset = ChestXRayDataset(
             samples=[(dataset_dict[filenames[i]][0], dataset_dict[filenames[i]][1]) 
                     for i in train_idx],
-            training_config= self.training_config,
+            training_config=self.training_config,
             is_train=True
         )
 

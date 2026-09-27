@@ -5,7 +5,7 @@ class DataAugmentation():
     """
     Create the transformations for all files and
     the ones specific to the train set. It includes
-    geometric and luminosity transformations using
+    geometric and photometric transformations using
     the Albumentations library. 
     """
     

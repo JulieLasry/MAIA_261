@@ -1,3 +1,7 @@
+paths:
+  output_dir: outputs/train
+  model_dir: models
+
 augmentation:     
   rotation: [-5.0, 5.0]             # degrees
   translation: [-0.1, 0.1]          # percentage of the image
@@ -25,22 +29,17 @@ metrics:
 
 hyperparameters:
   dropout: 0.4
-
   optimizer: AdamW
   lr_phase1: 1.0e-3
   lr_phase2: 1.0e-4
   weight_decay: 1.0e-4
-
   lr_scheduler_patience: 5
   lr_es_patience_phase1: 4
   lr_es_patience_phase2: 10
-
   max_epochs_phase1: 15
   max_epochs_phase2: 50
-
   unfreeze_stages: 2
 
 training:
   name: "baseline"
   amp: True
-

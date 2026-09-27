@@ -82,6 +82,14 @@ analysis (ROC/PRC, uncertainty, latent space) on the best fold.
 See docs/preprocessing_readme.md, docs/training_readme.md and
 docs/testing_readme.md for details.
 
+## MLflow tracking
+Training logs (loss/metrics curves per epoch) are saved per fold as
+SQLite databases under outputs/train/mlflow/. To visualize a fold's run:
+
+mlflow ui --backend-store-uri sqlite:///outputs/train/mlflow/baseline_fold_1.db
+
+Then open http://127.0.0.1:5000 in your browser.
+
 # Configuration files :
 
 Three configuration files were defined, highliting the various 
